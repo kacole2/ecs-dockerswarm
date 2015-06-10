@@ -1,0 +1,31 @@
+--- 
+ecsnode01: 
+  environment: 
+    - SS_GENCONFIG=1
+  image: "emccode/ecsobjectsw:v2.0"
+  net: host
+  restart: always
+  volumes: 
+    - "/host:/host"
+    - "/var/log/vipr/emcvipr-object:/opt/storageos/logs"
+    - "/data:/data:rw"
+ecsnode02: 
+  environment: 
+    - SS_GENCONFIG=1
+  image: "emccode/ecsobjectsw:v2.0"
+  net: host
+  restart: always
+  volumes: 
+    - "/host:/host"
+    - "/var/log/vipr/emcvipr-object:/opt/storageos/logs"
+    - "/data:/data:rw"
+ecsnode03: 
+  environment: 
+    - SS_GENCONFIG=1
+  image: "emccode/ecsobjectsw:v2.0"
+  net: host
+  restart: always
+  volumes: 
+    - "/host:/host"
+    - "/var/log/vipr/emcvipr-object:/opt/storageos/logs"
+    - "/data:/data:rw"
