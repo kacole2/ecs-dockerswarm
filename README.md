@@ -7,8 +7,8 @@ ecs-docker is a tutorial on using EMC's ECS as a multi-node Docker container set
 
 ## Requirements
 * Each ECS node requires 16GB of RAM and an attached volume with a minimum of 512GB. The attached volume stores persistent data that is replicated between  three nodes.
-* [Docker Machine](https://docs.docker.com/machine/) installed on your local laptop
-* [Docker Compose](https://docs.docker.com/compose/) installed on your local laptop
+* [Docker Machine](https://docs.docker.com/machine/) installed on your local laptop. Use `0.3.0-rc2` or later [Docker Machine Releases](https://github.com/docker/machine/releases) or until all `--swarm` commands are merged into a stable release.
+* [Docker Compose](https://docs.docker.com/compose/) installed on your local laptop. Use `1.3.0 RC2` or later [Docker Compose Releases](https://github.com/docker/compose/releases).
 * [Docker Client](https://docs.docker.com/machine//) installed on your local laptop. (follow Docker Client installation directions)
 
 This is for test and development purposes. Not for production use. Please reach out to your local EMC SE for information on production usage. EMC ECS ships as a commodity storage appliance for production use.
@@ -16,26 +16,32 @@ This is for test and development purposes. Not for production use. Please reach 
 ## Lets Get Going
 
 #### Setup 3 Ubuntu Hosts with Docker Swarm using Docker Machine
-The following examples use Ubuntu. This is a requirement for using the setup scripts.
+The following examples use Ubuntu. Ubuntu is a requirement for using the setup scripts.
 
 [Docker Machine](https://docs.docker.com/machine/) examples are shown with the AWS driver with the standard Ubuntu AMI. However, any cloud or compatible infrastructure with Docker Machine can be used.
 
-1. Create a [Docker Swarm](https://docs.docker.com/swarm/) ID. 
-    1. This can be done by using `docker run swarm create` on any host that can run Docker. If no host is available, use Docker Machine to create the host: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc swarm-create`
+1. The following inbound ports must be opened to your Docker-Machine hosts. Within AWS, this is called a *Security Group*
+    * 22 (SSH)
+    * 2376 (Docker)
+    * 3376 (Docker Swarm)
+    * 443 (HTTPS GUI access for ECS)
+    * 4443 (API access for ECS)
+2. Create a [Docker Swarm](https://docs.docker.com/swarm/) ID. 
+    1. This can be done by using `docker run swarm:0.3.0-rc2 create` on any host that can run Docker. If no host is available, use Docker Machine to create the host: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc swarm-create`
     2. Connect to the Docker Machine: `docker-machine env swarm-create`
     3. Get shell access: `eval "$(docker-machine env swarm-create)"`
-    4. Run the Swarm container: `docker run swarm create`
-    5. The output will have a unique id such as `b353bb30194d59ab33e4d47c012ee895`.
-2. Create a [Docker Swarm](https://docs.docker.com/swarm/) 3 node cluster using [Docker Machine](https://docs.docker.com/machine/). Each node requires:
+    4. Run the Swarm container: `docker run swarm:0.3.0-rc2 create` (currently must use the latest which is `v0.3.0-rc2` to support Docker Compose)
+    5. The output will have a unique token such as `b353bb30194d59ab33e4d47c012ee895`.
+3. Create a [Docker Swarm](https://docs.docker.com/swarm/) 3 node cluster using [Docker Machine](https://docs.docker.com/machine/). Each node requires:
     - a root drive of >=20GB
-    - 16GB RAM or more
-    - A Swarm token
+    - 28GB RAM or more
+    - A Swarm token using image `0.3.0-rc2` or higher or until this is merged until this becomes the stable release
 
-    1. Create Swarm Master: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc --amazonec2-instance-type m3.xlarge --amazonec2-root-size 50 --swarm --swarm-master --swarm-discovery token://b353bb30194d59ab33e4d47c012ee895 swarm-master`
-    2. Create Node 01: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc --amazonec2-instance-type m3.xlarge --amazonec2-root-size 50 --swarm --swarm-discovery token://b353bb30194d59ab33e4d47c012ee895 swarm-node01`
-    3. Create Node 02: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc --amazonec2-instance-type m3.xlarge --amazonec2-root-size 50 --swarm --swarm-discovery token://b353bb30194d59ab33e4d47c012ee895 swarm-node02`
+    1. Create Swarm Master: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc --amazonec2-instance-type r3.xlarge --amazonec2-root-size 50 --swarm --swarm-image=swarm:0.3.0-rc2 --swarm-master --swarm-discovery token://b353bb30194d59ab33e4d47c012ee895 swarm-master`
+    2. Create Node 01: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc --amazonec2-instance-type r3.xlarge --amazonec2-root-size 50 --swarm --swarm-image=swarm:0.3.0-rc2 --swarm-discovery token://b353bb30194d59ab33e4d47c012ee895 swarm-node01`
+    3. Create Node 02: `docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc --amazonec2-instance-type r3.xlarge --amazonec2-root-size 50 --swarm --swarm-image=swarm:0.3.0-rc2 --swarm-discovery token://b353bb30194d59ab33e4d47c012ee895 swarm-node02`
     
-- note:The `-D` flag is used to look at diagnostics. It's not necessary.
+- note: The `-D` flag is used to look at diagnostics. It's not necessary.
 
 #### Add A Volume to Each Node
 Docker containers, by nature, are used for stateless applications. By attaching an outside volume (not the root volume), data persistence is achieved. The container running the ECS software is ephemeral and the volume containing the data can be attached to any ECS container. All ECS nodes replicate data to one another and store logs in this attached Volume. The volume needs to be >=512GB.
@@ -87,6 +93,8 @@ The `docker-compose.yml` file will create 3 ECS containers including all  volume
 3. To test if swarm is working correctly, run `docker info` and you will see an output such as:
 ```
 Containers: 4
+Images: 3
+Storage Driver:
 Strategy: spread
 Filters: affinity, health, constraint, port, dependency
 Nodes: 3
@@ -102,35 +110,36 @@ Nodes: 3
   └ Containers: 1
   └ Reserved CPUs: 0 / 4
   └ Reserved Memory: 0 B / 15.42 GiB
+Execution Driver:
+Kernel Version:
+Operating System:
+CPUs: 12
+Total Memory: 94.38 GiB
+Name:
+ID:
+Http Proxy:
+Https Proxy:
+No Proxy:
 ```
 4. Copy this repo using `git clone https://github.com/emccode/ecs-docker.git` or save the `docker-compose.yml` file to a folder.
 5. Navigate to your folder such as `ecs-docker`
 6. Run `docker-compose up -d`. Docker Compose will be pointing towards the registerd Docker Client machine which is our swarm cluster:
-BELOW WILL BE CHANGED. This output show docker-compose will error out
 ```
-kcoleman-mbp:ecs-docker kcoleman$ docker-compose up -d
-Recreating swarm-agent...
 Pulling ecsnode02 (emccode/ecsobjectsw:v2.0)...
-swarm-master: Pulling emccode/ecsobjectsw:v2.0... : downloaded
 swarm-node01: Pulling emccode/ecsobjectsw:v2.0... : downloaded
 swarm-node02: Pulling emccode/ecsobjectsw:v2.0... : downloaded
-Traceback (most recent call last):
-  File "<string>", line 3, in <module>
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.cli.main", line 32, in main
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.cli.docopt_command", line 21, in sys_dispatch
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.cli.command", line 34, in dispatch
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.cli.docopt_command", line 24, in dispatch
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.cli.command", line 66, in perform_command
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.cli.main", line 470, in up
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.project", line 230, in up
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.service", line 333, in execute_convergence_plan
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.service", line 380, in recreate_container
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.service", line 214, in create_container
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.service", line 450, in _next_container_number
-  File "/compose/build/docker-compose/out00-PYZ.pyz/compose.container", line 70, in number
-ValueError: Container f9bef6a5b6 does not have a com.docker.compose.container-number label
+swarm-master: Pulling emccode/ecsobjectsw:v2.0... : downloaded
+Creating ecsdocker_ecsnode02_1...
+Creating ecsdocker_ecsnode03_1...
+Creating ecsdocker_ecsnode01_1...
 ```
-
+7. Make sure all containers are up using `docker ps` and wait 10-15 minutes for ECS to completely load.
+```
+CONTAINER ID        IMAGE                      COMMAND                CREATED             STATUS              PORTS               NAMES
+9054fc14ee5a        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   36 seconds ago      Up 35 seconds                           swarm-node01/ecsdocker_ecsnode01_1
+a90ef32ce5ec        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node02/ecsdocker_ecsnode03_1
+e6356782748c        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node01/ecsdocker_ecsnode02_1
+```
 #### Access Granted!
 Will finish up when I can access the services and UI.
 
