@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #Created by Kendrick Coleman of the EMC {code} Team and Licensed under MIT.
-#This script will prepare a Ubuntu Host for running an ECS container. 
+#Please visit us at emccode.github.io
+#This script will prepare an Ubuntu Host for running an ECS container. 
 #This has been properly tested with Docker Machine's default image in AWS.
-#Change '/dev/$VOL' to another mount point if it differs
 
 #Read in variable arguments from command line
 if [ -z "$1" ]; then
@@ -59,7 +59,7 @@ echo "Creating symlink"
 ln -s /bin/grep /usr/bin/grep
 
 echo "Downloading additional_prep.sh"
-curl -O https://raw.githubusercontent.com/emccode/ecs-docker/master/additional_prep.sh
+curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/additional_prep.sh
 
 echo "Changing additional_prep.sh Permissions"
 chmod 777 additional_prep.sh
