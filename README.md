@@ -29,13 +29,21 @@ The following examples use Ubuntu. Ubuntu is a requirement for using the setup s
     | 3376      | TCP       | Docker Swarm |
     | 443       | TCP       | HTTPS GUI access for ECS |
     | 4443      | TCP       | API access for ECS |
-    | 9094-9098 | TCP       | ECS nodes to ECS nodes in other sites |
+    | 9898, 1098,1198,1298      | TCP       | ECS nodes to ECS nodes in other sites |
+    | 8088, 9888      | TCP       | ECS nodes to ECS nodes in other sites |
+    | 2181      | TCP       | ECS nodes to ECS nodes in other sites |
+    | 9069      | TCP       | ECS nodes to ECS nodes in other sites |
+    | 9094-9099 | TCP       | ECS nodes to ECS nodes in other sites |
+    | 9201-9210 | TCP       | ECS nodes to ECS nodes in other sites |
+    | 9100-9101 | TCP       | DT Query |
     | 3218      | TCP       | CAS API |
+    | 9010-9011 | TCP       | Object Control HTTP/HTTPS |
     | 9020-9021 | TCP       | S3 Object API over HTTP/HTTPS |
     | 9022-9023 | TCP       | ATMOS Object API over HTTP/HTTPS |
     | 9024-9025 | TCP       | Swift Object API over HTTP/HTTPS |
+    | 9028-9029 | TCP       | API Server over HTTP/HTTPS |
     | 9040      | TCP       | HDFS Service |
-    | 5120, 5123, 7578| TCP       | Management access to Remote Management Module of ECS nodes |
+    | 1095, 1096, 5120, 5123, 7578, 9099| TCP       | Management access to Remote Management Module of ECS nodes |
     
     all port information can be found on the [ECS Security Configuration Guide](https://community.emc.com/docs/DOC-45012)
 
@@ -88,11 +96,11 @@ This example shows how to attach a volume using AWS.
 Each host requires a script to be ran that prepares the volumes attached as XFS and builds a multitude of folders and permissions.
 
 1. Using Docker Machine, download the setup script from this repo
-    ```
-    docker-machine ssh swarm-master "curl -O https://raw.githubusercontent.com/emccode/ecs-docker/master/docker-machine-hostprep.sh"
-    docker-machine ssh swarm-node01 "curl -O https://raw.githubusercontent.com/emccode/ecs-docker/master/docker-machine-hostprep.sh"
-    docker-machine ssh swarm-node02 "curl -O https://raw.githubusercontent.com/emccode/ecs-docker/master/docker-machine-hostprep.sh"
-    ```
+  ```
+  docker-machine ssh swarm-master "curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/docker-machine-hostprep.sh"
+  docker-machine ssh swarm-node01 "curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/docker-machine-hostprep.sh"
+  docker-machine ssh swarm-node02 "curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/docker-machine-hostprep.sh"
+  ```
 2. The hosts require the **internal** IPs of all the ECS nodes in the cluster. You can retrieve all **external** IPs with `docker-machine ls` (not needed):
   ```
   NAME        ACTIVE   DRIVER      STATE     URL                     SWARM
@@ -174,7 +182,7 @@ e6356782748c        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds
 After a few minutes, the ECS UI will be available. To access the UI, point your browser to one of the **Public IP addresses** using `https://`. You can retrieve all **external** IPs with `docker-machine ls` (not needed):
   ```
   NAME        ACTIVE   DRIVER      STATE     URL                     SWARM
-  swarm-create   *   amazonec2   Running   tcp://52.4.23.123:2376
+  swarm-create       amazonec2   Running   tcp://52.4.23.123:2376
   swarm-master       amazonec2   Running   tcp://52.7.13.18:2376    swarm-master (master)
   swarm-node01       amazonec2   Running   tcp://54.12.23.16:2376   swarm-master
   swarm-node02       amazonec2   Running   tcp://52.7.19.173:2376   swarm-master
@@ -188,14 +196,16 @@ At this point, there are still more steps to be completed like adding the licens
 
 Download two files to one of the hosts:
 ```
-docker-machine ssh swarm-master "curl -O curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/license.xml"
-docker-machine ssh swarm-master "curl -O curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/object_prep.py"
+docker-machine ssh swarm-master "curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/license.xml"
+docker-machine ssh swarm-master "curl -O https://raw.githubusercontent.com/emccode/ecs-dockerswarm/master/object_prep.py"
 ```
 
 Next, run the python script. In the `ECSNodes` flag, specify the Public IP address of one of the nodes. This script will take about 10-15 minutes to complete. Do not exit out of the script
 ```
-docker-machine ssh swarm-master "sudo sudo python object_prep.py --ECSNodes=52.7.13.18 --Namespace=ns1 --ObjectVArray=ova1 --ObjectVPool=ovp1 --UserName=emccode --DataStoreName=ds1 --VDCName=vdc1 --MethodName="
+docker-machine ssh swarm-master "sudo python object_prep.py --ECSNodes=52.7.13.18 --Namespace=ns1 --ObjectVArray=ova1 --ObjectVPool=ovp1 --UserName=emccode --DataStoreName=ds1 --VDCName=vdc1 --MethodName="
 ```
+
+At this point, you can put the ECS nodes behind a load balancer and single IP/DNS name for traffic re-direction. Hooray!
 
 ## Contribution
 Create a fork of the project into your own reposity. Make all your necessary changes and create a pull request with a description on what was added or removed and details explaining the changes in lines of code. If approved, project owners will merge it.
