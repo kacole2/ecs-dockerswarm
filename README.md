@@ -149,11 +149,11 @@ Creating ecsdocker_ecsnode01_1...
 7. Make sure all containers are up using `docker ps` and wait 10-15 minutes for ECS to completely load. 
 ```
 CONTAINER ID        IMAGE                      COMMAND                CREATED             STATUS              PORTS               NAMES
-9054fc14ee5a        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   36 seconds ago      Up 35 seconds                           swarm-master/ecsdocker_ecsnode01_1
-a90ef32ce5ec        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node02/ecsdocker_ecsnode03_1
-e6356782748c        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node01/ecsdocker_ecsnode02_1
+9054fc14ee5a        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   36 seconds ago      Up 35 seconds                           swarm-master/ecsdockerswarm_ecsnode01_1
+a90ef32ce5ec        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node01/ecsdockerswarm_ecsnode02_1
+e6356782748c        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node02/ecsdockerswarm_ecsnode03_1
 ```
-**Warning** It can't be guarenteed that all the containers will be spread amongst the three machines. The Docker Swarm strategy is set to `--spread` by default which means all the containers are evenly distributed across all Docker Swarm hosts. Review [Docker Swarm Advanced Scheduling](https://docs.docker.com/swarm/scheduler/strategy/) to learn more. Sucessfull attempts require the containers to be spread out amongst the three hosts.
+**Warning** `docker-compose.yml` calls out the use of affinity rules based on the container name. If the container name is changed within the `docker-compose.yml` file, then the environment variable needs to be edited as well.
 
 #### ECS UI Access
 After a few minutes, the ECS UI will be available. To access the UI, point your browser to one of the **Public IP addresses** using `https://`. You can retrieve all **external** IPs with `docker-machine ls` (not needed):

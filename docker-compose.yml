@@ -2,7 +2,9 @@
 --- 
 ecsnode01: 
   environment: 
-    - SS_GENCONFIG=1
+    - "SS_GENCONFIG=1"
+    - "affinity:container!=*ecsnode02*"
+    - "affinity:container!=*ecsnode03*"
   image: "emccode/ecsobjectsw:v2.0"
   net: host
   restart: always
@@ -12,7 +14,9 @@ ecsnode01:
     - "/data:/data:rw"
 ecsnode02: 
   environment: 
-    - SS_GENCONFIG=1
+    - "SS_GENCONFIG=1"
+    - "affinity:container!=*ecsnode01*"
+    - "affinity:container!=*ecsnode03*"
   image: "emccode/ecsobjectsw:v2.0"
   net: host
   restart: always
@@ -22,7 +26,9 @@ ecsnode02:
     - "/data:/data:rw"
 ecsnode03: 
   environment: 
-    - SS_GENCONFIG=1
+    - "SS_GENCONFIG=1"
+    - "affinity:container!=*ecsnode01*"
+    - "affinity:container!=*ecsnode02*"
   image: "emccode/ecsobjectsw:v2.0"
   net: host
   restart: always
