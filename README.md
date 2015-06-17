@@ -1,6 +1,6 @@
 ecs-dockerswarm
 ======================
-ecs-dockerswarm is a tutorial on using EMC's ECS as a multi-node Docker container setup using Docker Swarm, Docker Machine and Docker Compose.
+Deploy EMC's ECS as a multi-node Docker container setup using Docker Compose into a Docker Swarm cluster created by Docker Machine.
 
 ## Description
 [EMC Elastic Cloud Storage (ECS)](https://www.emc.com/storage/ecs-appliance/index.htm?forumID) is a software-defined cloud storage platform that exposes S3, Swift, and Atmos endpoints. This walk-through will demonstate the setup of a 3 Node ECS Cluster using Docker containers and Docker tools.
