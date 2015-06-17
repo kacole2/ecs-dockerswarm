@@ -20,32 +20,9 @@ The following examples use Ubuntu. Ubuntu is a requirement for using the setup s
 
 [Docker Machine](https://docs.docker.com/machine/) examples are shown with the AWS driver with the standard Ubuntu AMI. However, any cloud or compatible infrastructure with Docker Machine can be used.
 
-1. The following *inbound* ports must be opened to your Docker-Machine hosts. Within AWS, this is called a *Security Group*
-
-    | Port      | Protocol  | Reason                                |
-    | ------    |:---------:| -------------------------------------:|
-    | 22        | TCP       | SSH                                   |
-    | 2376      | TCP       | Docker                                |
-    | 3376      | TCP       | Docker Swarm |
-    | 443       | TCP       | HTTPS GUI access for ECS |
-    | 4443      | TCP       | API access for ECS |
-    | 9898, 1098,1198,1298      | TCP       | ECS nodes to ECS nodes in other sites |
-    | 8088, 9888      | TCP       | ECS nodes to ECS nodes in other sites |
-    | 2181      | TCP       | ECS nodes to ECS nodes in other sites |
-    | 9069      | TCP       | ECS nodes to ECS nodes in other sites |
-    | 9094-9099 | TCP       | ECS nodes to ECS nodes in other sites |
-    | 9201-9210 | TCP       | ECS nodes to ECS nodes in other sites |
-    | 9100-9101 | TCP       | DT Query |
-    | 3218      | TCP       | CAS API |
-    | 9010-9011 | TCP       | Object Control HTTP/HTTPS |
-    | 9020-9021 | TCP       | S3 Object API over HTTP/HTTPS |
-    | 9022-9023 | TCP       | ATMOS Object API over HTTP/HTTPS |
-    | 9024-9025 | TCP       | Swift Object API over HTTP/HTTPS |
-    | 9028-9029 | TCP       | API Server over HTTP/HTTPS |
-    | 9040      | TCP       | HDFS Service |
-    | 1095, 1096, 5120, 5123, 7578, 9099| TCP       | Management access to Remote Management Module of ECS nodes |
+1. At this beta stage, the security of ports hasn't been defined. For this to work properly, ports 0-65535 need opened *inbound* to each of your Docker Machine hosts. Within AWS, this is called a *Security Group*
     
-    all port information can be found on the [ECS Security Configuration Guide](https://community.emc.com/docs/DOC-45012)
+    more port information can be found on the [ECS Security Configuration Guide](https://community.emc.com/docs/DOC-45012)
 
 2. Create a [Docker Swarm](https://docs.docker.com/swarm/) ID. 
 
@@ -75,7 +52,7 @@ The following examples use Ubuntu. Ubuntu is a requirement for using the setup s
     docker-machine -D create --driver amazonec2 --amazonec2-access-key MYKEY --amazonec2-secret-key MYSECRETKEY --amazonec2-vpc-id vpc-myvpc --amazonec2-instance-type r3.xlarge --amazonec2-root-size 50 --swarm --swarm-image=swarm:0.3.0-rc2 --swarm-discovery token://b353bb30194d59ab33e4d47c012ee895 swarm-node02
     ```
     
-- note: The `-D` flag is used to look at diagnostics. It's not necessary.
+- note: The `-D` flag is used to look at diagnostics. It's not necessary, but helpful when looking for bugs since this all requires the Release Candidate versions of all tooling
 
 #### Add A Volume to Each Node
 Docker containers, by nature, are used for stateless applications. By attaching an outside volume (not the root volume), data persistence is achieved. The container running the ECS software is ephemeral and the volume containing the data can be attached to any ECS container. All ECS nodes replicate data to one another and store logs in this attached Volume. The volume needs to be >=512GB.
@@ -176,7 +153,7 @@ CONTAINER ID        IMAGE                      COMMAND                CREATED   
 a90ef32ce5ec        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node02/ecsdocker_ecsnode03_1
 e6356782748c        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node01/ecsdocker_ecsnode02_1
 ```
-**Warning** It can't be guarenteed that all the containers will be spread amongst the three machines. The Docker Swarm strategy is set to `--spread` by default which means all the containers are evenly distributed across all Docker Swarm hosts. Review [Docker Swarm Advanced Scheduling](https://docs.docker.com/swarm/scheduler/strategy/) to learn more. 
+**Warning** It can't be guarenteed that all the containers will be spread amongst the three machines. The Docker Swarm strategy is set to `--spread` by default which means all the containers are evenly distributed across all Docker Swarm hosts. Review [Docker Swarm Advanced Scheduling](https://docs.docker.com/swarm/scheduler/strategy/) to learn more. Sucessfull attempts require the containers to be spread out amongst the three hosts.
 
 #### ECS UI Access
 After a few minutes, the ECS UI will be available. To access the UI, point your browser to one of the **Public IP addresses** using `https://`. You can retrieve all **external** IPs with `docker-machine ls` (not needed):
