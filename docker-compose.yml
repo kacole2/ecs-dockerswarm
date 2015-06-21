@@ -5,7 +5,7 @@ ecsnode01:
     - "SS_GENCONFIG=1"
     - "affinity:container!=*ecsnode02*"
     - "affinity:container!=*ecsnode03*"
-  image: "emccode/ecsobjectsw:v2.0"
+  image: "emccorp/ecs-software"
   net: host
   restart: always
   volumes: 
@@ -17,7 +17,7 @@ ecsnode02:
     - "SS_GENCONFIG=1"
     - "affinity:container!=*ecsnode01*"
     - "affinity:container!=*ecsnode03*"
-  image: "emccode/ecsobjectsw:v2.0"
+  image: "emccorp/ecs-software"
   net: host
   restart: always
   volumes: 
@@ -29,7 +29,7 @@ ecsnode03:
     - "SS_GENCONFIG=1"
     - "affinity:container!=*ecsnode01*"
     - "affinity:container!=*ecsnode02*"
-  image: "emccode/ecsobjectsw:v2.0"
+  image: "emccorp/ecs-software"
   net: host
   restart: always
   volumes: 

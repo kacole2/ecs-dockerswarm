@@ -9,7 +9,7 @@ Deploy EMC's ECS as a multi-node Docker container setup using Docker Compose int
 * Each ECS node requires 16GB of RAM and an attached volume with a minimum of 512GB. The attached volume stores persistent data that is replicated between  three nodes.
 * [Docker Machine](https://docs.docker.com/machine/) installed on your local laptop. Use `0.3.0-rc2` or later [Docker Machine Releases](https://github.com/docker/machine/releases) or until all `--swarm` commands are merged into a stable release.
 * [Docker Compose](https://docs.docker.com/compose/) installed on your local laptop. Use `1.3.0 RC2` or later [Docker Compose Releases](https://github.com/docker/compose/releases).
-* [Docker Client](https://docs.docker.com/machine//) installed on your local laptop. (follow Docker Client installation directions)
+* [Docker Client](https://docs.docker.com/machine/) installed on your local laptop. (follow Docker Client installation directions)
 
 This is for test and development purposes. Not for production use. Please reach out to your local EMC SE for information on production usage. EMC ECS ships as a commodity storage appliance for production use.
 
@@ -134,24 +134,24 @@ Http Proxy:
 Https Proxy:
 No Proxy:
 ```
-4. Copy this repo using `git clone https://github.com/emccode/ecs-docker.git` or save the `docker-compose.yml` file to a folder.
-5. Navigate to your folder such as `ecs-docker`
+4. Copy this repo using `git clone https://github.com/emccode/ecs-dockerswarm.git` or save the `docker-compose.yml` file to a folder.
+5. Navigate to your folder such as `ecs-dockerswarm`
 6. Run `docker-compose up -d`. Docker Compose will be pointing towards the registerd Docker Client machine which is our swarm cluster:
 ```
-Pulling ecsnode02 (emccode/ecsobjectsw:v2.0)...
-swarm-node01: Pulling emccode/ecsobjectsw:v2.0... : downloaded
-swarm-node02: Pulling emccode/ecsobjectsw:v2.0... : downloaded
-swarm-master: Pulling emccode/ecsobjectsw:v2.0... : downloaded
-Creating ecsdocker_ecsnode02_1...
-Creating ecsdocker_ecsnode03_1...
-Creating ecsdocker_ecsnode01_1...
+Pulling ecsnode02 (emccorp/ecs-software)...
+swarm-node01: Pulling emccorp/ecs-software... : downloaded
+swarm-node02: Pulling emccorp/ecs-software... : downloaded
+swarm-master: Pulling emccorp/ecs-software... : downloaded
+Creating ecsdockerswarm_ecsnode02_1...
+Creating ecsdockerswarm_ecsnode03_1...
+Creating ecsdockerswarm_ecsnode01_1...
 ```
 7. Make sure all containers are up using `docker ps` and wait 10-15 minutes for ECS to completely load. 
 ```
 CONTAINER ID        IMAGE                      COMMAND                CREATED             STATUS              PORTS               NAMES
-9054fc14ee5a        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   36 seconds ago      Up 35 seconds                           swarm-master/ecsdockerswarm_ecsnode01_1
-a90ef32ce5ec        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node01/ecsdockerswarm_ecsnode02_1
-e6356782748c        emccode/ecsobjectsw:v2.0   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node02/ecsdockerswarm_ecsnode03_1
+9054fc14ee5a        emccorp/ecs-software   "/opt/vipr/boot/boot   36 seconds ago      Up 35 seconds                           swarm-master/ecsdockerswarm_ecsnode01_1
+a90ef32ce5ec        emccorp/ecs-software   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node01/ecsdockerswarm_ecsnode02_1
+e6356782748c        emccorp/ecs-software   "/opt/vipr/boot/boot   39 seconds ago      Up 38 seconds                           swarm-node02/ecsdockerswarm_ecsnode03_1
 ```
 **Warning** `docker-compose.yml` calls out the use of affinity rules based on the container name. If the container name is changed within the `docker-compose.yml` file, then the environment variable needs to be edited as well.
 
